@@ -35,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -124,7 +125,7 @@ fun TrainingScreen(
                     when (state.workoutTimerState) {
                         is WorkoutTimerState.Completed -> {
                             Text(
-                                text = "Завершена",
+                                text = stringResource(R.string.training_status_completed),
                                 style = AppTypography.label,
                                 color = AppColor.secondary,
                             )
@@ -141,7 +142,7 @@ fun TrainingScreen(
                             )
                             Spacer(Modifier.width(AppSpacing.xs))
                             Text(
-                                text = "Пауза",
+                                text = stringResource(R.string.training_status_paused),
                                 style = AppTypography.label,
                                 color = AppColor.orange,
                             )
@@ -196,8 +197,12 @@ fun TrainingScreen(
             ) {
                 val title =
                     when (state.workoutTimerState) {
-                        is WorkoutTimerState.Completed -> "Отличная работа"
-                        else -> currentSegment?.name ?: if (state.isLoading) "Загрузка" else "Нет интервалов"
+                        is WorkoutTimerState.Completed -> stringResource(R.string.training_completed_title)
+                        else -> currentSegment?.name ?: if (state.isLoading) {
+                            stringResource(R.string.common_loading_short)
+                        } else {
+                            stringResource(R.string.training_no_intervals)
+                        }
                     }
                 val timerCardTotalSeconds =
                     when (state.workoutTimerState) {
@@ -225,12 +230,12 @@ fun TrainingScreen(
                     ) {
                         WorkoutSummaryCard(
                             modifier = Modifier.weight(1f),
-                            title = "Общее время",
+                            title = stringResource(R.string.training_summary_total_time),
                             value = TimeFormatter.formatIntervalTime(state.workoutTotalSeconds),
                         )
                         WorkoutSummaryCard(
                             modifier = Modifier.weight(1f),
-                            title = "Интервалов",
+                            title = stringResource(R.string.training_summary_intervals),
                             value = state.segments.size.toString(),
                         )
                     }
@@ -240,13 +245,17 @@ fun TrainingScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = "Интервалы",
+                        text = stringResource(R.string.training_intervals_title),
                         style = AppTypography.label,
                         color = AppColor.textSecondary,
                     )
                     Spacer(Modifier.weight(1f))
                     Text(
-                        text = "${if (state.segments.isEmpty()) 0 else state.currentSegmentIndex + 1} из ${state.segments.size}",
+                        text = stringResource(
+                            R.string.training_interval_count,
+                            if (state.segments.isEmpty()) 0 else state.currentSegmentIndex + 1,
+                            state.segments.size,
+                        ),
                         style = AppTypography.label,
                         color = AppColor.textTertiary,
                     )
@@ -330,7 +339,7 @@ fun TrainingScreen(
                                 )
                                 Spacer(Modifier.width(AppSpacing.s))
                                 Text(
-                                    text = "Старт",
+                                    text = stringResource(R.string.training_start),
                                     style = AppTypography.button,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
@@ -351,7 +360,7 @@ fun TrainingScreen(
                                 )
                                 Spacer(Modifier.width(AppSpacing.s))
                                 Text(
-                                    text = "Пауза",
+                                    text = stringResource(R.string.training_pause),
                                     style = AppTypography.button,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
@@ -359,7 +368,7 @@ fun TrainingScreen(
                             }
                             GhostButton(
                                 modifier = Modifier.fillMaxWidth(),
-                                text = "Сбросить тренировку",
+                                text = stringResource(R.string.training_reset),
                                 negative = true,
                                 onClick = { onAction(TrainingAction.ResetClicked) },
                             )
@@ -377,7 +386,7 @@ fun TrainingScreen(
                                 )
                                 Spacer(Modifier.width(AppSpacing.s))
                                 Text(
-                                    text = "Продолжить",
+                                    text = stringResource(R.string.training_resume),
                                     style = AppTypography.button,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
@@ -385,7 +394,7 @@ fun TrainingScreen(
                             }
                             GhostButton(
                                 modifier = Modifier.fillMaxWidth(),
-                                text = "Сбросить тренировку",
+                                text = stringResource(R.string.training_reset),
                                 negative = true,
                                 onClick = { onAction(TrainingAction.ResetClicked) },
                             )
@@ -404,7 +413,7 @@ fun TrainingScreen(
                                 )
                                 Spacer(Modifier.width(AppSpacing.s))
                                 Text(
-                                    text = "Запустить заново",
+                                    text = stringResource(R.string.training_restart),
                                     style = AppTypography.button,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
@@ -412,7 +421,7 @@ fun TrainingScreen(
                             }
                             GhostButton(
                                 modifier = Modifier.fillMaxWidth(),
-                                text = "Новая тренировка",
+                                text = stringResource(R.string.training_new_workout),
                                 onClick = { onAction(TrainingAction.ResetClicked) },
                             )
                         }
@@ -463,15 +472,35 @@ private fun TrainingScreen_Preview() {
     TrainingScreen(
         state =
             TrainingUiState(
-                workoutTitle = "Тренировка",
+                workoutTitle = stringResource(R.string.preview_workout_title),
                 currentSegmentIndex = 0,
                 segments =
                     listOf(
-                        IntervalSegment(name = "Разминка", totalSeconds = 60, elapsedSeconds = 0),
-                        IntervalSegment(name = "Быстрый бег", totalSeconds = 45, elapsedSeconds = 0),
-                        IntervalSegment(name = "Ходьба", totalSeconds = 30, elapsedSeconds = 0),
-                        IntervalSegment(name = "Прыжки", totalSeconds = 40, elapsedSeconds = 0),
-                        IntervalSegment(name = "Отдых", totalSeconds = 20, elapsedSeconds = 0),
+                        IntervalSegment(
+                            name = stringResource(R.string.preview_interval_warmup),
+                            totalSeconds = 60,
+                            elapsedSeconds = 0,
+                        ),
+                        IntervalSegment(
+                            name = stringResource(R.string.preview_interval_fast_run),
+                            totalSeconds = 45,
+                            elapsedSeconds = 0,
+                        ),
+                        IntervalSegment(
+                            name = stringResource(R.string.preview_interval_walk),
+                            totalSeconds = 30,
+                            elapsedSeconds = 0,
+                        ),
+                        IntervalSegment(
+                            name = stringResource(R.string.preview_interval_jumps),
+                            totalSeconds = 40,
+                            elapsedSeconds = 0,
+                        ),
+                        IntervalSegment(
+                            name = stringResource(R.string.preview_interval_rest),
+                            totalSeconds = 20,
+                            elapsedSeconds = 0,
+                        ),
                     ),
                 elapsedSeconds = 0,
                 workoutTotalSeconds = 300,

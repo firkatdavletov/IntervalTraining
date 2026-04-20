@@ -15,12 +15,10 @@ data class TrainingUiState(
     val workoutTotalSeconds: Int = 0,
     val isRunning: Boolean = false,
     val isLoading: Boolean = true,
-    val errorMessage: String? = null,
 )
 
 sealed interface TrainingAction {
     data object StartPauseClicked : TrainingAction
     data object ResetClicked : TrainingAction
     data object RefreshTimer : TrainingAction
-    data object DismissError : TrainingAction
 }

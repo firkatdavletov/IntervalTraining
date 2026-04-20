@@ -3,8 +3,10 @@ package com.firkat.intervaltraining.feature.training.presentation
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.firkat.intervaltraining.R
 import com.firkat.intervaltraining.core.model.IntervalSegment
 import com.firkat.intervaltraining.core.model.Workout
+import com.firkat.intervaltraining.core.resources.StringProvider
 import com.firkat.intervaltraining.domain.usecase.GetWorkoutByIdUseCase
 import com.firkat.intervaltraining.feature.training.timer.TimerClock
 import com.firkat.intervaltraining.ui.model.IntervalTimerState
@@ -36,10 +38,7 @@ class TrainingViewModel @Inject constructor(
         val workoutId = savedStateHandle.get<String>(WORKOUT_ID_ARG).orEmpty()
         if (workoutId.isBlank()) {
             _uiState.update {
-                it.copy(
-                    isLoading = false,
-                    errorMessage = "Workout id не найден",
-                )
+                it.copy(isLoading = false)
             }
         } else {
             loadWorkout(workoutId)
@@ -51,7 +50,6 @@ class TrainingViewModel @Inject constructor(
             TrainingAction.StartPauseClicked -> toggleTimer()
             TrainingAction.ResetClicked -> resetWorkout()
             TrainingAction.RefreshTimer -> refreshStartedTimer()
-            TrainingAction.DismissError -> _uiState.update { it.copy(errorMessage = null) }
         }
     }
 
@@ -61,7 +59,6 @@ class TrainingViewModel @Inject constructor(
                 it.copy(
                     workoutId = workoutId,
                     isLoading = true,
-                    errorMessage = null,
                 )
             }
 
@@ -115,7 +112,6 @@ class TrainingViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            errorMessage = "Не удалось загрузить тренировку",
                         )
                     }
                 }

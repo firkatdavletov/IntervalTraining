@@ -2,6 +2,8 @@ package com.firkat.intervaltraining.feature.loadworkout.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.firkat.intervaltraining.R
+import com.firkat.intervaltraining.core.resources.StringProvider
 import com.firkat.intervaltraining.domain.usecase.GetWorkoutByIdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -18,6 +20,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class LoadWorkoutViewModel @Inject constructor(
     private val getWorkoutByIdUseCase: GetWorkoutByIdUseCase,
+    private val stringProvider: StringProvider,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoadWorkoutUiState())
@@ -58,7 +61,7 @@ class LoadWorkoutViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        errorMessage = "Не удалось загрузить тренировку",
+                        errorMessage = stringProvider.getString(R.string.error_load_workout_failed),
                     )
                 }
             }

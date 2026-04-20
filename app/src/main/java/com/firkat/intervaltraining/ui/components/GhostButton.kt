@@ -10,10 +10,11 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.firkat.intervaltraining.R
 import com.firkat.intervaltraining.ui.theme.AppColor
 import com.firkat.intervaltraining.ui.theme.AppSpacing
 import com.firkat.intervaltraining.ui.theme.AppTypography
@@ -55,7 +56,7 @@ fun GhostButton(
 private fun GhostButtonPreview() {
     ThemePreviewContainer {
         GhostButton(
-            text = "Новая тренировка",
+            text = stringResource(R.string.training_new_workout),
             onClick = {},
             modifier = Modifier.fillMaxWidth(),
         )

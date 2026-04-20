@@ -5,6 +5,7 @@ import com.firkat.intervaltraining.core.model.IntervalSegment
 import com.firkat.intervaltraining.core.model.Workout
 import com.firkat.intervaltraining.domain.usecase.GetWorkoutByIdUseCase
 import com.firkat.intervaltraining.fakes.FakeWorkoutRepository
+import com.firkat.intervaltraining.testutil.FakeStringProvider
 import com.firkat.intervaltraining.testutil.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -35,6 +36,7 @@ class LoadWorkoutViewModelTest {
 
     private val viewModel = LoadWorkoutViewModel(
         getWorkoutByIdUseCase = GetWorkoutByIdUseCase(repository),
+        stringProvider = FakeStringProvider(),
     )
 
     @Test

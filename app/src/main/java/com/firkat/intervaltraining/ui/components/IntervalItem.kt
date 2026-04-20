@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
@@ -156,7 +157,7 @@ private fun IntervalItemPreview() {
         IntervalItem(
             modifier = Modifier.fillMaxWidth(),
             index = 3,
-            title = "Title",
+            title = stringResource(R.string.preview_interval_title),
             totalSeconds = 60,
             elapsedSeconds = 0,
             state = IntervalTimerState.Completed,

@@ -18,8 +18,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.firkat.intervaltraining.R
 import com.firkat.intervaltraining.ui.model.WorkoutTimerState
 import com.firkat.intervaltraining.ui.theme.AppColor
 import com.firkat.intervaltraining.ui.theme.AppSpacing
@@ -74,10 +76,10 @@ fun TimerCard(
 
     val stateLabel =
         when (state) {
-            is WorkoutTimerState.Completed -> "Тренировка завершена"
-            is WorkoutTimerState.Paused -> "На паузе"
-            WorkoutTimerState.Pending -> "Готово к старту"
-            is WorkoutTimerState.Started -> "Выполняется"
+            is WorkoutTimerState.Completed -> stringResource(R.string.timer_card_state_completed)
+            is WorkoutTimerState.Paused -> stringResource(R.string.timer_card_state_paused)
+            WorkoutTimerState.Pending -> stringResource(R.string.timer_card_state_pending)
+            is WorkoutTimerState.Started -> stringResource(R.string.timer_card_state_started)
         }
 
     val borderColor =
@@ -130,7 +132,7 @@ fun TimerCard(
             )
             Text(
                 text = when (state) {
-                    WorkoutTimerState.Completed -> "00:00"
+                    WorkoutTimerState.Completed -> stringResource(R.string.timer_card_zero_time)
                     WorkoutTimerState.Paused -> formattedElapsed
                     WorkoutTimerState.Pending -> formattedDuration
                     WorkoutTimerState.Started -> formattedElapsed
@@ -142,15 +144,15 @@ fun TimerCard(
                 text =
                     when (state) {
                         WorkoutTimerState.Pending -> {
-                            "Общее время"
+                            stringResource(R.string.timer_card_total_time)
                         }
 
                         WorkoutTimerState.Completed -> {
-                            "$formattedElapsed из $formattedDuration"
+                            stringResource(R.string.timer_card_elapsed_of_total, formattedElapsed, formattedDuration)
                         }
 
                         else -> {
-                            "Прошло $formattedElapsed из $formattedDuration"
+                            stringResource(R.string.timer_card_elapsed_label, formattedElapsed, formattedDuration)
                         }
                     },
                 style = AppTypography.caption,
@@ -182,7 +184,7 @@ private fun TimerCardPreview() {
     ThemePreviewContainer {
         TimerCard(
             modifier = Modifier.fillMaxWidth(),
-            title = "Медленный бег",
+            title = stringResource(R.string.preview_interval_slow_run),
             totalSeconds = 5 * 60,
             elapsedSeconds = 0,
             state = WorkoutTimerState.Started,

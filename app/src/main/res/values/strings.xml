@@ -1,3 +1,50 @@
 <resources>
     <string name="app_name">Interval Training</string>
+    <string name="load_workout_title">Интервальный таймер</string>
+    <string name="load_workout_description">Введите ID тренировки для загрузки программы интервалов</string>
+    <string name="load_workout_id_supporting_text">ID тренировки</string>
+    <string name="load_workout_submit">Загрузить</string>
+
+    <string name="common_loading">Загрузка...</string>
+    <string name="common_loading_short">Загрузка</string>
+    <string name="common_retry">Повторить</string>
+
+    <string name="error_load_workout_failed">Не удалось загрузить тренировку</string>
+    <string name="error_workout_id_not_found">Workout id не найден</string>
+
+    <string name="training_status_completed">Завершена</string>
+    <string name="training_status_paused">Пауза</string>
+    <string name="training_completed_title">Отличная работа</string>
+    <string name="training_no_intervals">Нет интервалов</string>
+    <string name="training_summary_total_time">Общее время</string>
+    <string name="training_summary_intervals">Интервалов</string>
+    <string name="training_intervals_title">Интервалы</string>
+    <string name="training_interval_count">%1$d из %2$d</string>
+    <string name="training_start">Старт</string>
+    <string name="training_pause">Пауза</string>
+    <string name="training_reset">Сбросить тренировку</string>
+    <string name="training_resume">Продолжить</string>
+    <string name="training_restart">Запустить заново</string>
+    <string name="training_new_workout">Новая тренировка</string>
+
+    <string name="timer_card_state_completed">Тренировка завершена</string>
+    <string name="timer_card_state_paused">На паузе</string>
+    <string name="timer_card_state_pending">Готово к старту</string>
+    <string name="timer_card_state_started">Выполняется</string>
+    <string name="timer_card_zero_time">00:00</string>
+    <string name="timer_card_total_time">Общее время</string>
+    <string name="timer_card_elapsed_of_total">%1$s из %2$s</string>
+    <string name="timer_card_elapsed_label">Прошло %1$s из %2$s</string>
+
+    <string name="preview_workout_title">Тренировка</string>
+    <string name="preview_interval_warmup">Разминка</string>
+    <string name="preview_interval_fast_run">Быстрый бег</string>
+    <string name="preview_interval_walk">Ходьба</string>
+    <string name="preview_interval_jumps">Прыжки</string>
+    <string name="preview_interval_rest">Отдых</string>
+    <string name="preview_interval_slow_run">Медленный бег</string>
+    <string name="preview_interval_title">Title</string>
+    <string name="preview_number_badge_value">3</string>
+    <string name="preview_input_placeholder">Workout name</string>
+    <string name="preview_input_error">Тренировка не найдена. Проверьте ID</string>
 </resources>

@@ -15,19 +15,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -103,13 +101,13 @@ fun LoadWorkoutScreen(
                 )
             }
             Text(
-                text = "Интервальный таймер",
+                text = stringResource(R.string.load_workout_title),
                 style = AppTypography.h1,
                 color = AppColor.textPrimary,
                 textAlign = TextAlign.Center,
             )
             Text(
-                text = "Введите ID тренировки для загрузки программы интервалов",
+                text = stringResource(R.string.load_workout_description),
                 style = AppTypography.body,
                 color = AppColor.textSecondary,
                 textAlign = TextAlign.Center,
@@ -120,7 +118,7 @@ fun LoadWorkoutScreen(
                         .fillMaxWidth()
                         .testTag(LOAD_WORKOUT_ID_INPUT_TAG),
                 value = state.workoutIdInput,
-                supportingText = "ID тренировки",
+                supportingText = stringResource(R.string.load_workout_id_supporting_text),
                 errorText = state.errorMessage,
                 onValueChange = {
                     onAction(LoadWorkoutAction.WorkoutIdChanged(it))
@@ -144,14 +142,18 @@ fun LoadWorkoutScreen(
                     )
                     Spacer(Modifier.width(AppSpacing.s))
                     Text(
-                        text = "Загрузка...",
+                        text = stringResource(R.string.common_loading),
                         style = AppTypography.button,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                 } else {
                     Text(
-                        text = if (state.errorMessage == null) "Загрузить" else "Повторить",
+                        text = if (state.errorMessage == null) {
+                            stringResource(R.string.load_workout_submit)
+                        } else {
+                            stringResource(R.string.common_retry)
+                        },
                         style = AppTypography.button,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,

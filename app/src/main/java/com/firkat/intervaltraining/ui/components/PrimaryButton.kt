@@ -16,9 +16,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.firkat.intervaltraining.R
 import com.firkat.intervaltraining.ui.theme.AppColor
 import com.firkat.intervaltraining.ui.theme.AppSpacing
 import com.firkat.intervaltraining.ui.theme.AppTypography
@@ -67,7 +69,7 @@ private fun PrimaryButtonPreview() {
                 )
                 Spacer(Modifier.width(AppSpacing.s))
                 Text(
-                    text = "Загрузка...",
+                    text = stringResource(R.string.common_loading),
                     style = AppTypography.button,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
