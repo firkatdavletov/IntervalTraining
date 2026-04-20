@@ -18,7 +18,8 @@ import com.firkat.intervaltraining.ui.theme.AppTypography
 @Composable
 fun NumberBadge(
     value: String,
-    color: Color,
+    containerColor: Color,
+    contentColor: Color,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -26,13 +27,13 @@ fun NumberBadge(
             modifier
                 .size(28.dp)
                 .clip(RoundedCornerShape(100.dp))
-                .background(color),
+                .background(containerColor),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = value,
             style = AppTypography.caption,
-            color = AppColor.surface,
+            color = contentColor,
         )
     }
 }
@@ -43,7 +44,8 @@ private fun NumberBadgePreview() {
     ThemePreviewContainer {
         NumberBadge(
             value = "3",
-            color = AppColor.primary,
+            containerColor = AppColor.primary,
+            contentColor = AppColor.bg
         )
     }
 }

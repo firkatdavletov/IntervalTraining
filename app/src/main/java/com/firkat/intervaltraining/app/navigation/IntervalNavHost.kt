@@ -35,7 +35,9 @@ fun IntervalNavHost(
                 type = NavType.StringType
             }),
         ) {
-            TrainingRoute()
+            TrainingRoute(
+                onNavigateBack = navController::popBackStack,
+            )
         }
     }
 }

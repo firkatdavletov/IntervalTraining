@@ -7,11 +7,11 @@ import com.firkat.intervaltraining.core.di.IoDispatcher
 import com.firkat.intervaltraining.core.model.IntervalSegment
 import com.firkat.intervaltraining.core.model.Workout
 import com.firkat.intervaltraining.domain.repository.WorkoutRepository
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class WorkoutRepositoryImpl @Inject constructor(
@@ -30,15 +30,17 @@ class WorkoutRepositoryImpl @Inject constructor(
 
     private fun mockWorkout(id: String): Workout = Workout(
         id = id,
-        title = "Mock Interval Training",
-        totalTime = 195,
+        title = "Тренировка 7",
+        totalTime = 30,
         elapsedTime = 0,
         intervals = listOf(
-            IntervalSegment(name = "Разминка", totalSeconds = 60, elapsedSeconds = 0),
-            IntervalSegment(name = "Быстрый бег", totalSeconds = 45, elapsedSeconds = 0),
-            IntervalSegment(name = "Ходьба", totalSeconds = 30, elapsedSeconds = 0),
-            IntervalSegment(name = "Прыжки", totalSeconds = 40, elapsedSeconds = 0),
-            IntervalSegment(name = "Отдых", totalSeconds = 20, elapsedSeconds = 0),
+            IntervalSegment(name = "Ходьба в среднем темпе", totalSeconds = 15, elapsedSeconds = 0),
+            IntervalSegment(name = "Ходьба в интенсивном темпе", totalSeconds = 15, elapsedSeconds = 0),
+//            IntervalSegment(name = "Ходьба в среднем темпе", totalSeconds = 120, elapsedSeconds = 0),
+//            IntervalSegment(name = "Медленный бег", totalSeconds = 30, elapsedSeconds = 0),
+//            IntervalSegment(name = "Ходьба в среднем темпе", totalSeconds = 90, elapsedSeconds = 0),
+//            IntervalSegment(name = "Медленный бег", totalSeconds = 30, elapsedSeconds = 0),
+//            IntervalSegment(name = "Ходьба в среднем темпе", totalSeconds = 30, elapsedSeconds = 0),
         ),
     )
 }

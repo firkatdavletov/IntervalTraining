@@ -33,14 +33,12 @@ class LoadWorkoutViewModel @Inject constructor(
             }
 
             LoadWorkoutAction.SubmitClicked -> loadWorkout()
-            LoadWorkoutAction.ClearErrorClicked -> _uiState.update { it.copy(errorMessage = null) }
         }
     }
 
     private fun loadWorkout() {
         val workoutId = uiState.value.workoutIdInput.trim()
         if (workoutId.isBlank()) {
-            _uiState.update { it.copy(errorMessage = "Введите id тренировки") }
             return
         }
 

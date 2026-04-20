@@ -4,6 +4,8 @@ sealed interface IntervalTimerState {
 
     data object Pending : IntervalTimerState
 
+    data object Selected : IntervalTimerState
+
     data object Started : IntervalTimerState
 
     data object Paused : IntervalTimerState

@@ -10,7 +10,6 @@ data class LoadWorkoutUiState(
 sealed interface LoadWorkoutAction {
     data class WorkoutIdChanged(val value: String) : LoadWorkoutAction
     data object SubmitClicked : LoadWorkoutAction
-    data object ClearErrorClicked : LoadWorkoutAction
 }
 
 sealed interface LoadWorkoutEvent {

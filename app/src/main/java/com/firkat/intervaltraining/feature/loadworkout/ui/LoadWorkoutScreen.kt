@@ -25,9 +25,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -72,18 +74,8 @@ fun LoadWorkoutScreen(
     onAction: (LoadWorkoutAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    LaunchedEffect(state.errorMessage) {
-        state.errorMessage?.let { message ->
-            snackbarHostState.showSnackbar(message)
-            onAction(LoadWorkoutAction.ClearErrorClicked)
-        }
-    }
-
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = AppColor.bg,
     ) { innerPadding ->
         Column(
@@ -91,8 +83,8 @@ fun LoadWorkoutScreen(
                 Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .padding(AppSpacing.l),
-            verticalArrangement = Arrangement.spacedBy(AppSpacing.l),
+                    .padding(AppSpacing.xl),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.xl),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Box(
@@ -106,13 +98,21 @@ fun LoadWorkoutScreen(
                 Image(
                     modifier = Modifier.size(32.dp),
                     imageVector = ImageVector.vectorResource(R.drawable.ic_schedule),
+                    colorFilter = ColorFilter.tint(AppColor.surface),
                     contentDescription = null,
                 )
             }
             Text(
-                text = "Интервальная тренировка",
+                text = "Интервальный таймер",
                 style = AppTypography.h1,
                 color = AppColor.textPrimary,
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                text = "Введите ID тренировки для загрузки программы интервалов",
+                style = AppTypography.body,
+                color = AppColor.textSecondary,
+                textAlign = TextAlign.Center,
             )
             InputField(
                 modifier =
@@ -120,6 +120,8 @@ fun LoadWorkoutScreen(
                         .fillMaxWidth()
                         .testTag(LOAD_WORKOUT_ID_INPUT_TAG),
                 value = state.workoutIdInput,
+                supportingText = "ID тренировки",
+                errorText = state.errorMessage,
                 onValueChange = {
                     onAction(LoadWorkoutAction.WorkoutIdChanged(it))
                 },
@@ -128,6 +130,7 @@ fun LoadWorkoutScreen(
             PrimaryButton(
                 onClick = { onAction(LoadWorkoutAction.SubmitClicked) },
                 enabled = !state.isLoading,
+                isLoading = state.isLoading,
                 modifier =
                     Modifier
                         .fillMaxWidth()
@@ -148,7 +151,7 @@ fun LoadWorkoutScreen(
                     )
                 } else {
                     Text(
-                        text = "Загрузить",
+                        text = if (state.errorMessage == null) "Загрузить" else "Повторить",
                         style = AppTypography.button,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,

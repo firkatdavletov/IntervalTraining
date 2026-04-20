@@ -1,36 +1,38 @@
 package com.firkat.intervaltraining.feature.training.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
@@ -40,8 +42,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.firkat.intervaltraining.R
 import com.firkat.intervaltraining.core.model.IntervalSegment
 import com.firkat.intervaltraining.feature.training.presentation.TrainingAction
@@ -60,11 +62,15 @@ import com.firkat.intervaltraining.ui.theme.AppTypography
 import com.firkat.intervaltraining.util.TimeFormatter
 
 @Composable
-fun TrainingRoute(viewModel: TrainingViewModel = hiltViewModel()) {
+fun TrainingRoute(
+    onNavigateBack: () -> Unit,
+    viewModel: TrainingViewModel = hiltViewModel(),
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     TrainingScreen(
         state = state,
         onAction = viewModel::onAction,
+        onBackClick = onNavigateBack,
     )
 }
 
@@ -73,47 +79,46 @@ fun TrainingRoute(viewModel: TrainingViewModel = hiltViewModel()) {
 fun TrainingScreen(
     state: TrainingUiState,
     onAction: (TrainingAction) -> Unit,
+    onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    LaunchedEffect(state.errorMessage) {
-        state.errorMessage?.let { message ->
-            snackbarHostState.showSnackbar(message)
-            onAction(TrainingAction.DismissError)
-        }
-    }
-
     val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                onAction(TrainingAction.RefreshTimer)
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
-
     val currentSegment = state.segments.getOrNull(state.currentSegmentIndex)
     val currentSegmentElapsedSeconds = currentSegment?.elapsedSeconds ?: 0
     val currentSegmentTotalSeconds = currentSegment?.totalSeconds ?: 0
     val workoutRemainingSeconds = (state.workoutTotalSeconds - state.elapsedSeconds).coerceAtLeast(0)
 
+    DisposableEffect(lifecycleOwner) {
+        val observer =
+            LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    onAction(TrainingAction.RefreshTimer)
+                }
+            }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
             CenterAlignedTopAppBar(
+                modifier =
+                    Modifier
+                        .systemBarsPadding()
+                        .padding(start = AppSpacing.l, end = AppSpacing.xxl),
                 navigationIcon = {
                     BackButton(
-                        onClick = {
-                        },
+                        onClick = onBackClick,
                     )
                 },
                 title = {
-                    Text(text = state.workoutTitle)
+                    Text(
+                        text = state.workoutTitle,
+                        style = AppTypography.title,
+                        color = AppColor.textPrimary,
+                    )
                 },
                 actions = {
                     when (state.workoutTimerState) {
@@ -127,10 +132,12 @@ fun TrainingScreen(
 
                         is WorkoutTimerState.Paused -> {
                             Image(
-                                modifier = Modifier.size(12.dp),
+                                modifier = Modifier
+                                    .size(16.dp)
+                                    .align(Alignment.CenterVertically),
                                 imageVector = ImageVector.vectorResource(R.drawable.ic_pause),
                                 contentDescription = null,
-                                colorFilter = ColorFilter.tint(AppColor.surface),
+                                colorFilter = ColorFilter.tint(AppColor.orange),
                             )
                             Spacer(Modifier.width(AppSpacing.xs))
                             Text(
@@ -144,7 +151,7 @@ fun TrainingScreen(
                             Text(
                                 text = TimeFormatter.formatIntervalTime(state.workoutTotalSeconds),
                                 style = AppTypography.label,
-                                color = AppColor.textTertiary,
+                                color = AppColor.textSecondary,
                             )
                         }
 
@@ -153,9 +160,11 @@ fun TrainingScreen(
                                 modifier =
                                     Modifier
                                         .size(12.dp)
+                                        .clip(CircleShape)
                                         .background(AppColor.primary)
-                                        .clip(CircleShape),
+                                        .align(Alignment.CenterVertically),
                             )
+                            Spacer(Modifier.width(AppSpacing.xs))
                             Text(
                                 text = TimeFormatter.formatIntervalTime(workoutRemainingSeconds),
                                 style = AppTypography.label,
@@ -164,14 +173,12 @@ fun TrainingScreen(
                         }
                     }
                 },
-                windowInsets = WindowInsets(left = 8.dp, right = 16.dp),
                 colors =
                     TopAppBarDefaults.topAppBarColors(
                         containerColor = AppColor.bg,
                     ),
             )
         },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = AppColor.bg,
     ) { innerPadding ->
         Box(
@@ -184,8 +191,8 @@ fun TrainingScreen(
                     Modifier
                         .fillMaxSize()
                         .padding(innerPadding)
-                        .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                        .padding(horizontal = AppSpacing.xxl),
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.xl),
             ) {
                 val title =
                     when (state.workoutTimerState) {
@@ -193,16 +200,17 @@ fun TrainingScreen(
                         else -> currentSegment?.name ?: if (state.isLoading) "Загрузка" else "Нет интервалов"
                     }
                 val timerCardTotalSeconds =
-                    if (state.workoutTimerState is WorkoutTimerState.Completed) {
-                        state.workoutTotalSeconds
-                    } else {
-                        currentSegmentTotalSeconds
+                    when (state.workoutTimerState) {
+                        WorkoutTimerState.Pending,
+                        WorkoutTimerState.Completed -> state.workoutTotalSeconds
+
+                        else -> currentSegmentTotalSeconds
                     }
                 val timerCardElapsedSeconds =
-                    if (state.workoutTimerState is WorkoutTimerState.Completed) {
-                        state.elapsedSeconds
-                    } else {
-                        currentSegmentElapsedSeconds
+                    when (state.workoutTimerState) {
+                        WorkoutTimerState.Completed -> state.elapsedSeconds
+                        WorkoutTimerState.Pending -> 0
+                        else -> currentSegmentElapsedSeconds
                     }
                 TimerCard(
                     title = title,
@@ -210,20 +218,45 @@ fun TrainingScreen(
                     elapsedSeconds = timerCardElapsedSeconds,
                     state = state.workoutTimerState,
                 )
+                if (state.workoutTimerState is WorkoutTimerState.Completed) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(AppSpacing.s),
+                    ) {
+                        WorkoutSummaryCard(
+                            modifier = Modifier.weight(1f),
+                            title = "Общее время",
+                            value = TimeFormatter.formatIntervalTime(state.workoutTotalSeconds),
+                        )
+                        WorkoutSummaryCard(
+                            modifier = Modifier.weight(1f),
+                            title = "Интервалов",
+                            value = state.segments.size.toString(),
+                        )
+                    }
+                }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = "Интервалы",
                         style = AppTypography.label,
                         color = AppColor.textSecondary,
                     )
+                    Spacer(Modifier.weight(1f))
                     Text(
                         text = "${if (state.segments.isEmpty()) 0 else state.currentSegmentIndex + 1} из ${state.segments.size}",
                         style = AppTypography.label,
                         color = AppColor.textTertiary,
                     )
+                    if (state.workoutTimerState is WorkoutTimerState.Completed) {
+                        Image(
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_check_small),
+                            contentDescription = null,
+                            colorFilter = ColorFilter.tint(AppColor.textTertiary)
+                        )
+                    }
                 }
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth(),
@@ -241,127 +274,185 @@ fun TrainingScreen(
                             state =
                                 when {
                                     state.workoutTimerState is WorkoutTimerState.Completed -> IntervalTimerState.Completed
+
                                     state.workoutTimerState !is WorkoutTimerState.Pending &&
                                         interval.elapsedSeconds >= interval.totalSeconds -> IntervalTimerState.Completed
+
+                                    state.workoutTimerState is WorkoutTimerState.Pending &&
+                                        state.currentSegmentIndex == it -> IntervalTimerState.Selected
+
                                     state.currentSegmentIndex == it -> state.timerState
+
                                     else -> IntervalTimerState.Pending
                                 },
                         )
                     }
+                    item {
+                        Spacer(modifier = Modifier.height(160.dp))
+                    }
                 }
             }
 
-            Column(
+            Box(
                 modifier =
                     Modifier
                         .fillMaxWidth()
                         .align(Alignment.BottomCenter)
-                        .padding(start = AppSpacing.l, end = AppSpacing.l, bottom = AppSpacing.l)
-                        .navigationBarsPadding(),
-                verticalArrangement = Arrangement.spacedBy(AppSpacing.s),
+                        .background(
+                            Brush.verticalGradient(
+                                colors =
+                                    listOf(
+                                        AppColor.bg.copy(alpha = 0f),
+                                        AppColor.bg,
+                                    ),
+                            ),
+                        )
+                        .padding(top = 72.dp),
             ) {
-                when (state.workoutTimerState) {
-                    WorkoutTimerState.Pending -> {
-                        PrimaryButton(
-                            modifier = Modifier.fillMaxWidth(),
-                            onClick = { onAction(TrainingAction.StartPauseClicked) },
-                        ) {
-                            Image(
-                                imageVector = ImageVector.vectorResource(R.drawable.ic_play),
-                                contentDescription = null,
-                                colorFilter = ColorFilter.tint(AppColor.surface),
-                            )
-                            Spacer(Modifier.width(AppSpacing.s))
-                            Text(
-                                text = "Старт",
-                                style = AppTypography.button,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
+                Column(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(start = AppSpacing.xxl, end = AppSpacing.xxl, bottom = AppSpacing.xxl)
+                            .navigationBarsPadding(),
+                    verticalArrangement = Arrangement.spacedBy(AppSpacing.s),
+                ) {
+                    when (state.workoutTimerState) {
+                        WorkoutTimerState.Pending -> {
+                            PrimaryButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = { onAction(TrainingAction.StartPauseClicked) },
+                            ) {
+                                Image(
+                                    imageVector = ImageVector.vectorResource(R.drawable.ic_play),
+                                    contentDescription = null,
+                                    colorFilter = ColorFilter.tint(AppColor.surface),
+                                )
+                                Spacer(Modifier.width(AppSpacing.s))
+                                Text(
+                                    text = "Старт",
+                                    style = AppTypography.button,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
                         }
-                    }
 
-                    is WorkoutTimerState.Started -> {
-                        PrimaryButton(
-                            modifier = Modifier.fillMaxWidth(),
-                            accentColor = AppColor.orange,
-                            onClick = { onAction(TrainingAction.StartPauseClicked) },
-                        ) {
-                            Image(
-                                imageVector = ImageVector.vectorResource(R.drawable.ic_pause),
-                                contentDescription = null,
-                                colorFilter = ColorFilter.tint(AppColor.surface),
-                            )
-                            Spacer(Modifier.width(AppSpacing.s))
-                            Text(
-                                text = "Пауза",
-                                style = AppTypography.button,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
+                        is WorkoutTimerState.Started -> {
+                            PrimaryButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                accentColor = AppColor.orange,
+                                onClick = { onAction(TrainingAction.StartPauseClicked) },
+                            ) {
+                                Image(
+                                    imageVector = ImageVector.vectorResource(R.drawable.ic_pause),
+                                    contentDescription = null,
+                                    colorFilter = ColorFilter.tint(AppColor.surface),
+                                )
+                                Spacer(Modifier.width(AppSpacing.s))
+                                Text(
+                                    text = "Пауза",
+                                    style = AppTypography.button,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                            GhostButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = "Сбросить тренировку",
+                                negative = true,
+                                onClick = { onAction(TrainingAction.ResetClicked) },
                             )
                         }
-                        GhostButton(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = "Сбросить тренировку",
-                            negative = true,
-                            onClick = { onAction(TrainingAction.ResetClicked) },
-                        )
-                    }
 
-                    is WorkoutTimerState.Paused -> {
-                        PrimaryButton(
-                            modifier = Modifier.fillMaxWidth(),
-                            onClick = { onAction(TrainingAction.StartPauseClicked) },
-                        ) {
-                            Image(
-                                imageVector = ImageVector.vectorResource(R.drawable.ic_play),
-                                contentDescription = null,
-                                colorFilter = ColorFilter.tint(AppColor.surface),
-                            )
-                            Spacer(Modifier.width(AppSpacing.s))
-                            Text(
-                                text = "Продолжить",
-                                style = AppTypography.button,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
+                        is WorkoutTimerState.Paused -> {
+                            PrimaryButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = { onAction(TrainingAction.StartPauseClicked) },
+                            ) {
+                                Image(
+                                    imageVector = ImageVector.vectorResource(R.drawable.ic_play),
+                                    contentDescription = null,
+                                    colorFilter = ColorFilter.tint(AppColor.surface),
+                                )
+                                Spacer(Modifier.width(AppSpacing.s))
+                                Text(
+                                    text = "Продолжить",
+                                    style = AppTypography.button,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                            GhostButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = "Сбросить тренировку",
+                                negative = true,
+                                onClick = { onAction(TrainingAction.ResetClicked) },
                             )
                         }
-                        GhostButton(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = "Сбросить тренировку",
-                            negative = true,
-                            onClick = { onAction(TrainingAction.ResetClicked) },
-                        )
-                    }
 
-                    is WorkoutTimerState.Completed -> {
-                        PrimaryButton(
-                            modifier = Modifier.fillMaxWidth(),
-                            accentColor = AppColor.secondary,
-                            onClick = { onAction(TrainingAction.StartPauseClicked) },
-                        ) {
-                            Image(
-                                imageVector = ImageVector.vectorResource(R.drawable.ic_replay),
-                                contentDescription = null,
-                                colorFilter = ColorFilter.tint(AppColor.surface),
-                            )
-                            Spacer(Modifier.width(AppSpacing.s))
-                            Text(
-                                text = "Запустить заново",
-                                style = AppTypography.button,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
+                        is WorkoutTimerState.Completed -> {
+                            PrimaryButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                accentColor = AppColor.secondary,
+                                onClick = { onAction(TrainingAction.StartPauseClicked) },
+                            ) {
+                                Image(
+                                    imageVector = ImageVector.vectorResource(R.drawable.ic_replay),
+                                    contentDescription = null,
+                                    colorFilter = ColorFilter.tint(AppColor.surface),
+                                )
+                                Spacer(Modifier.width(AppSpacing.s))
+                                Text(
+                                    text = "Запустить заново",
+                                    style = AppTypography.button,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                            GhostButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = "Новая тренировка",
+                                onClick = { onAction(TrainingAction.ResetClicked) },
                             )
                         }
-                        GhostButton(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = "Новая тренировка",
-                            negative = true,
-                            onClick = { onAction(TrainingAction.ResetClicked) },
-                        )
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun WorkoutSummaryCard(
+    title: String,
+    value: String,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.5.dp, AppColor.border),
+        colors = CardDefaults.cardColors(containerColor = AppColor.surface),
+    ) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(AppSpacing.l),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.xs),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = value,
+                style = AppTypography.mono,
+                color = AppColor.textPrimary,
+            )
+            Text(
+                text = title,
+                style = AppTypography.label,
+                color = AppColor.textTertiary,
+            )
         }
     }
 }
@@ -384,9 +475,10 @@ private fun TrainingScreen_Preview() {
                     ),
                 elapsedSeconds = 0,
                 workoutTotalSeconds = 300,
-                workoutTimerState = WorkoutTimerState.Pending,
+                workoutTimerState = WorkoutTimerState.Completed,
                 timerState = IntervalTimerState.Pending,
             ),
         onAction = {},
+        onBackClick = {},
     )
 }

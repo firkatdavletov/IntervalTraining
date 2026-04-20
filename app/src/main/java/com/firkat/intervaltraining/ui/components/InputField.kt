@@ -34,12 +34,20 @@ fun InputField(
     placeholder: String = "",
     enabled: Boolean = true,
     errorText: String? = null,
+    supportingText: String? = null
 ) {
     val shape = RoundedCornerShape(12.dp)
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(AppSpacing.s),
     ) {
+        if (supportingText != null) {
+            Text(
+                text = supportingText,
+                style = AppTypography.label,
+                color = AppColor.textSecondary
+            )
+        }
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,

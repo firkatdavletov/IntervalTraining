@@ -1,5 +1,6 @@
 package com.firkat.intervaltraining.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -27,6 +28,7 @@ fun PrimaryButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    isLoading: Boolean = false,
     accentColor: Color = AppColor.primary,
     content: @Composable (RowScope.() -> Unit)
 ) {
@@ -35,12 +37,13 @@ fun PrimaryButton(
         enabled = enabled,
         shape = RoundedCornerShape(12.dp),
         modifier = modifier.height(52.dp),
+        border = if (isLoading) BorderStroke(1.5.dp, AppColor.primary) else null,
         contentPadding = PaddingValues(horizontal = AppSpacing.l),
         colors =
             ButtonDefaults.buttonColors(
                 containerColor = accentColor,
                 contentColor = AppColor.surface,
-                disabledContainerColor = accentColor.copy(alpha = 0.1f),
+                disabledContainerColor = AppColor.primaryLight,
                 disabledContentColor = AppColor.primary.copy(alpha = 0.5f),
             ),
         content = content,
@@ -55,6 +58,7 @@ private fun PrimaryButtonPreview() {
             onClick = {},
             modifier = Modifier.fillMaxWidth(),
             enabled = false,
+            isLoading = true,
             content = {
                 CircularProgressIndicator(
                     modifier = Modifier.size(AppSpacing.xxl),

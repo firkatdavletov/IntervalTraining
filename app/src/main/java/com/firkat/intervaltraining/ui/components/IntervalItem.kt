@@ -1,6 +1,7 @@
 package com.firkat.intervaltraining.ui.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,8 +16,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.firkat.intervaltraining.R
 import com.firkat.intervaltraining.ui.model.IntervalTimerState
 import com.firkat.intervaltraining.ui.theme.AppColor
 import com.firkat.intervaltraining.ui.theme.AppSpacing
@@ -38,9 +44,10 @@ fun IntervalItem(
     val progress = if (safeDurationMillis == 0) 0f else elapsedForProgress.toFloat() / safeDurationMillis.toFloat()
     val borderColor =
         when (state) {
-            is IntervalTimerState.Completed -> AppColor.surface
+            is IntervalTimerState.Completed -> AppColor.disabledBg
             is IntervalTimerState.Paused -> AppColor.orange
             IntervalTimerState.Pending -> AppColor.surface
+            IntervalTimerState.Selected -> AppColor.primary
             is IntervalTimerState.Started -> AppColor.primary
         }
     val progressFillColor = borderColor.copy(alpha = 0.1f)
@@ -53,14 +60,29 @@ fun IntervalItem(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
         border = BorderStroke(1.5.dp, borderColor),
-        colors = CardDefaults.cardColors(containerColor = AppColor.surface),
+        colors = CardDefaults.cardColors(
+            containerColor = if (state is IntervalTimerState.Completed) {
+                AppColor.disabledBg
+            } else {
+                AppColor.surface
+            }
+        ),
     ) {
         val badgeColor =
             when (state) {
-                is IntervalTimerState.Completed -> AppColor.textTertiary
+                is IntervalTimerState.Completed -> AppColor.disabledBg
                 is IntervalTimerState.Paused -> AppColor.orange
-                IntervalTimerState.Pending -> AppColor.textSecondary
+                IntervalTimerState.Pending -> AppColor.disabledBg
+                IntervalTimerState.Selected -> AppColor.primary
                 is IntervalTimerState.Started -> AppColor.primary
+            }
+        val badgeContentColor =
+            when (state) {
+                is IntervalTimerState.Completed -> AppColor.textTertiary
+                is IntervalTimerState.Paused -> AppColor.surface
+                IntervalTimerState.Pending -> AppColor.textTertiary
+                IntervalTimerState.Selected -> AppColor.surface
+                is IntervalTimerState.Started -> AppColor.surface
             }
         Box(
             modifier =
@@ -78,16 +100,23 @@ fun IntervalItem(
         ) {
             Row(
                 modifier =
-                    Modifier.padding(
-                        horizontal = AppSpacing.m,
-                        vertical = AppSpacing.s,
-                    ),
+                    Modifier.padding(AppSpacing.m),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                NumberBadge(
-                    value = index.toString(),
-                    color = badgeColor,
-                )
+                if (state is IntervalTimerState.Completed) {
+                    Image(
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_check),
+                        contentDescription = null,
+                        colorFilter = ColorFilter.tint(AppColor.textTertiary)
+                    )
+                } else {
+                    NumberBadge(
+                        value = index.toString(),
+                        containerColor = badgeColor,
+                        contentColor =badgeContentColor
+                    )
+                }
+
                 Text(
                     modifier =
                         Modifier.padding(
@@ -95,13 +124,24 @@ fun IntervalItem(
                             vertical = 12.dp,
                         ),
                     style = AppTypography.label,
-                    color = AppColor.textPrimary,
+                    color = if (state is IntervalTimerState.Completed) {
+                        AppColor.textTertiary
+                    } else {
+                        AppColor.textPrimary
+                    },
                     text = title,
+                    textDecoration = if (state is IntervalTimerState.Completed) {
+                        TextDecoration.LineThrough
+                    } else null
                 )
                 Spacer(Modifier.weight(1f))
                 Text(
                     style = AppTypography.mono,
-                    color = badgeColor,
+                    color = if (state is IntervalTimerState.Completed) {
+                        AppColor.textTertiary
+                    } else {
+                        AppColor.textSecondary
+                    },
                     text = timerString,
                 )
             }
@@ -119,7 +159,7 @@ private fun IntervalItemPreview() {
             title = "Title",
             totalSeconds = 60,
             elapsedSeconds = 0,
-            state = IntervalTimerState.Pending,
+            state = IntervalTimerState.Completed,
         )
     }
 }
