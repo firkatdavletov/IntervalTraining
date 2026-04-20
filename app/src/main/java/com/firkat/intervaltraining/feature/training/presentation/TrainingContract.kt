@@ -21,5 +21,6 @@ data class TrainingUiState(
 sealed interface TrainingAction {
     data object StartPauseClicked : TrainingAction
     data object ResetClicked : TrainingAction
+    data object RefreshTimer : TrainingAction
     data object DismissError : TrainingAction
 }

@@ -24,6 +24,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -37,7 +38,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.firkat.intervaltraining.R
 import com.firkat.intervaltraining.core.model.IntervalSegment
 import com.firkat.intervaltraining.feature.training.presentation.TrainingAction
@@ -79,6 +83,24 @@ fun TrainingScreen(
             onAction(TrainingAction.DismissError)
         }
     }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                onAction(TrainingAction.RefreshTimer)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    val currentSegment = state.segments.getOrNull(state.currentSegmentIndex)
+    val currentSegmentElapsedSeconds = currentSegment?.elapsedSeconds ?: 0
+    val currentSegmentTotalSeconds = currentSegment?.totalSeconds ?: 0
+    val workoutRemainingSeconds = (state.workoutTotalSeconds - state.elapsedSeconds).coerceAtLeast(0)
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -135,7 +157,7 @@ fun TrainingScreen(
                                         .clip(CircleShape),
                             )
                             Text(
-                                text = TimeFormatter.formatIntervalTime(state.elapsedSeconds),
+                                text = TimeFormatter.formatIntervalTime(workoutRemainingSeconds),
                                 style = AppTypography.label,
                                 color = AppColor.primary,
                             )
@@ -168,12 +190,24 @@ fun TrainingScreen(
                 val title =
                     when (state.workoutTimerState) {
                         is WorkoutTimerState.Completed -> "Отличная работа"
-                        else -> state.segments[state.currentSegmentIndex].name
+                        else -> currentSegment?.name ?: if (state.isLoading) "Загрузка" else "Нет интервалов"
+                    }
+                val timerCardTotalSeconds =
+                    if (state.workoutTimerState is WorkoutTimerState.Completed) {
+                        state.workoutTotalSeconds
+                    } else {
+                        currentSegmentTotalSeconds
+                    }
+                val timerCardElapsedSeconds =
+                    if (state.workoutTimerState is WorkoutTimerState.Completed) {
+                        state.elapsedSeconds
+                    } else {
+                        currentSegmentElapsedSeconds
                     }
                 TimerCard(
                     title = title,
-                    totalSeconds = state.workoutTotalSeconds,
-                    elapsedSeconds = state.elapsedSeconds,
+                    totalSeconds = timerCardTotalSeconds,
+                    elapsedSeconds = timerCardElapsedSeconds,
                     state = state.workoutTimerState,
                 )
                 Row(
@@ -186,7 +220,7 @@ fun TrainingScreen(
                         color = AppColor.textSecondary,
                     )
                     Text(
-                        text = "${state.currentSegmentIndex + 1} из ${state.segments.size}",
+                        text = "${if (state.segments.isEmpty()) 0 else state.currentSegmentIndex + 1} из ${state.segments.size}",
                         style = AppTypography.label,
                         color = AppColor.textTertiary,
                     )
@@ -205,10 +239,12 @@ fun TrainingScreen(
                             totalSeconds = interval.totalSeconds,
                             elapsedSeconds = interval.elapsedSeconds,
                             state =
-                                if (state.currentSegmentIndex == it) {
-                                    state.timerState
-                                } else {
-                                    IntervalTimerState.Pending
+                                when {
+                                    state.workoutTimerState is WorkoutTimerState.Completed -> IntervalTimerState.Completed
+                                    state.workoutTimerState !is WorkoutTimerState.Pending &&
+                                        interval.elapsedSeconds >= interval.totalSeconds -> IntervalTimerState.Completed
+                                    state.currentSegmentIndex == it -> state.timerState
+                                    else -> IntervalTimerState.Pending
                                 },
                         )
                     }
@@ -228,7 +264,7 @@ fun TrainingScreen(
                     WorkoutTimerState.Pending -> {
                         PrimaryButton(
                             modifier = Modifier.fillMaxWidth(),
-                            onClick = {},
+                            onClick = { onAction(TrainingAction.StartPauseClicked) },
                         ) {
                             Image(
                                 imageVector = ImageVector.vectorResource(R.drawable.ic_play),
@@ -249,7 +285,7 @@ fun TrainingScreen(
                         PrimaryButton(
                             modifier = Modifier.fillMaxWidth(),
                             accentColor = AppColor.orange,
-                            onClick = {},
+                            onClick = { onAction(TrainingAction.StartPauseClicked) },
                         ) {
                             Image(
                                 imageVector = ImageVector.vectorResource(R.drawable.ic_pause),
@@ -268,14 +304,14 @@ fun TrainingScreen(
                             modifier = Modifier.fillMaxWidth(),
                             text = "Сбросить тренировку",
                             negative = true,
-                            onClick = {},
+                            onClick = { onAction(TrainingAction.ResetClicked) },
                         )
                     }
 
                     is WorkoutTimerState.Paused -> {
                         PrimaryButton(
                             modifier = Modifier.fillMaxWidth(),
-                            onClick = {},
+                            onClick = { onAction(TrainingAction.StartPauseClicked) },
                         ) {
                             Image(
                                 imageVector = ImageVector.vectorResource(R.drawable.ic_play),
@@ -294,7 +330,7 @@ fun TrainingScreen(
                             modifier = Modifier.fillMaxWidth(),
                             text = "Сбросить тренировку",
                             negative = true,
-                            onClick = {},
+                            onClick = { onAction(TrainingAction.ResetClicked) },
                         )
                     }
 
@@ -302,7 +338,7 @@ fun TrainingScreen(
                         PrimaryButton(
                             modifier = Modifier.fillMaxWidth(),
                             accentColor = AppColor.secondary,
-                            onClick = {},
+                            onClick = { onAction(TrainingAction.StartPauseClicked) },
                         ) {
                             Image(
                                 imageVector = ImageVector.vectorResource(R.drawable.ic_replay),
@@ -321,7 +357,7 @@ fun TrainingScreen(
                             modifier = Modifier.fillMaxWidth(),
                             text = "Новая тренировка",
                             negative = true,
-                            onClick = {},
+                            onClick = { onAction(TrainingAction.ResetClicked) },
                         )
                     }
                 }

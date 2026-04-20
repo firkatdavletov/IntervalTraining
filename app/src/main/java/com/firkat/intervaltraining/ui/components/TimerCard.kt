@@ -37,6 +37,7 @@ fun TimerCard(
     val safeDurationMillis = totalSeconds.coerceAtLeast(0)
     val safeElapsedMillis = elapsedSeconds.coerceAtLeast(0)
     val elapsedForProgress = if (safeDurationMillis == 0) 0 else safeElapsedMillis.coerceAtMost(safeDurationMillis)
+    val remainingSeconds = (safeDurationMillis - elapsedForProgress).coerceAtLeast(0)
     val progress =
         if (safeDurationMillis == 0 ||
             state is WorkoutTimerState.Pending
@@ -46,8 +47,8 @@ fun TimerCard(
             elapsedForProgress.toFloat() / safeDurationMillis.toFloat()
         }
 
-    val formattedElapsed = TimeFormatter.formatIntervalTime(safeElapsedMillis)
     val formattedDuration = TimeFormatter.formatIntervalTime(safeDurationMillis)
+    val formattedRemaining = TimeFormatter.formatIntervalTime(remainingSeconds)
 
     val accentColor =
         when (state) {
@@ -106,9 +107,9 @@ fun TimerCard(
             Text(
                 text = when (state) {
                     WorkoutTimerState.Completed -> "00:00"
-                    WorkoutTimerState.Paused -> formattedElapsed
+                    WorkoutTimerState.Paused -> formattedRemaining
                     WorkoutTimerState.Pending -> formattedDuration
-                    WorkoutTimerState.Started -> formattedElapsed
+                    WorkoutTimerState.Started -> formattedRemaining
                 },
                 style = AppTypography.timerDisplay,
                 color = accentColor,
@@ -121,7 +122,7 @@ fun TimerCard(
                         }
 
                         else -> {
-                            "Прошло $formattedElapsed из $formattedDuration"
+                            "Осталось $formattedRemaining из $formattedDuration"
                         }
                     },
                 style = AppTypography.caption,
