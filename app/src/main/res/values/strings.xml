@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Interval Training</string>
+    <string name="app_name">firkat-davletov-interval-timer</string>
     <string name="load_workout_title">Интервальный таймер</string>
     <string name="load_workout_description">Введите ID тренировки для загрузки программы интервалов</string>
     <string name="load_workout_id_supporting_text">ID тренировки</string>
